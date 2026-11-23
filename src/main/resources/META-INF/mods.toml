@@ -1,0 +1,42 @@
+# Pipe Totals - mods.toml
+modLoader="javafml" #mandatory
+loaderVersion="${loader_version_range}" #mandatory
+license="${mod_license}"
+
+[[mods]] #mandatory
+modId="${mod_id}" #mandatory
+version="${mod_version}" #mandatory
+displayName="${mod_name}" #mandatory
+authors="${mod_authors}" #optional
+description='''${mod_description}'''
+
+[[dependencies.${mod_id}]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="${forge_version_range}" #mandatory
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+# Jade provides the overlay this mod plugs into.
+[[dependencies.${mod_id}]]
+    modId="jade"
+    mandatory=true
+    versionRange="[11,12)"
+    ordering="AFTER"
+    side="BOTH"
+
+# GregTech CEu Modern provides the fluid pipes. The Jade providers are
+# only registered when it is loaded, but the mod is pointless without it.
+[[dependencies.${mod_id}]]
+    modId="gtceu"
+    mandatory=false
+    versionRange="[1,)"
+    ordering="AFTER"
+    side="BOTH"
