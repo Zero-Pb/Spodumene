@@ -101,6 +101,13 @@ dependencies {
     // are stable across the 1.20.1 line, including the 7.1.4 that
     // Monifactory 0.13.8 ships.
     implementation fg.deobf('curse.maven:gregtechceu-modern-890405:6764529')
+
+    // LDLib (LowDragLib) 1.0.52.a (1.20.1 Forge) - GTCEu's pipe and tank
+    // classes implement LDLib interfaces (syncdata package), so LDLib must
+    // be on the compile classpath as well. CurseMaven serves files without
+    // transitive dependency metadata, so it has to be declared explicitly.
+    // At runtime LDLib is provided by GTCEu itself.
+    implementation fg.deobf('curse.maven:ldlib-626676:8830518')
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
