@@ -1,4 +1,4 @@
-# Pipe Totals - mods.toml
+# JadeTech - mods.toml
 modLoader="javafml" #mandatory
 loaderVersion="${loader_version_range}" #mandatory
 license="${mod_license}"

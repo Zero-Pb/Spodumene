@@ -1,8 +1,10 @@
-# Pipe Totals
+# JadeTech
 
-A tiny Jade plugin mod for Minecraft 1.20.1 (Forge) that shows the **total amount of each fluid across a whole GregTech fluid pipe network**.
+Jade addons for GregTech CEu Modern (Minecraft 1.20.1 / Forge) — extra Jade displays for the things GregTech's own Jade support does not show.
 
-GregTech's fluid pipes each hold their own tank, and fluid keeps moving between them. GregTech's built-in Jade support only shows the tanks of the single pipe you are looking at, so the network-wide total is never visible anywhere. Pipe Totals fixes that: look at any fluid pipe and Jade adds one line per fluid with the amount summed over every connected pipe.
+The first feature shows the **total amount of each fluid across a whole GregTech fluid pipe network**.
+
+GregTech's fluid pipes each hold their own tank, and fluid keeps moving between them. GregTech's built-in Jade support only shows the tanks of the single pipe you are looking at, so the network-wide total is never visible anywhere. JadeTech fixes that: look at any fluid pipe and Jade adds one line per fluid with the amount summed over every connected pipe.
 
 ## What it does
 
@@ -26,10 +28,11 @@ For multiplayer, install it on both the server (which computes the totals) and t
 ./gradlew build
 ```
 
-Output: `build/libs/pipetotals-0.1.0.jar`
+Output: `build/libs/jadetech-0.1.0.jar`
 
-Jade and GregTech CEu Modern are pulled from CurseMaven at build time
-(`curse.maven:jade-324717:5876199`, `curse.maven:gregtechceu-modern-890405:6764529`).
+Jade, GregTech CEu Modern and LDLib are pulled from CurseMaven at build time
+(`curse.maven:jade-324717:5876199`, `curse.maven:gregtechceu-modern-890405:6764529`,
+`curse.maven:ldlib-626676:8830518` for the LDLib interfaces GTCEu's pipe classes implement).
 The code compiles against GTCEu 7.0.0; the GTCEu APIs it uses
 (`FluidPipeBlockEntity#getFluidTanks`, `PipeBlockEntity#isConnected`)
 are stable across the 1.20.1 line, including the 7.1.4 that
@@ -37,7 +40,7 @@ Monifactory 0.13.8 ships.
 
 A manual-trigger GitHub Actions workflow is included under
 `.github/workflows/build.yml` (same setup as Void Rain Fix: press
-"Run workflow", get the jar from the `pipe-totals-jar` artifact).
+"Run workflow", get the jar from the `jadetech-jar` artifact).
 
 ## Known simplifications (v0.1.0)
 
