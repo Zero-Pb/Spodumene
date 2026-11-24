@@ -100,7 +100,7 @@ dependencies {
     // Compiled against 7.0.0; the APIs used (getFluidTanks, isConnected)
     // are stable across the 1.20.1 line, including the 7.1.4 that
     // Monifactory 0.13.8 ships.
-    implementation fg.deobf('curse.maven:gregtechceu-modern-890405:6764529')
+    implementation fg.deobf('curse.maven:gregtechceu-modern-890405:7917773')
 
     // LDLib (LowDragLib) 1.0.52.a (1.20.1 Forge) - GTCEu's pipe and tank
     // classes implement LDLib interfaces (syncdata package), so LDLib must
