@@ -1,10 +1,10 @@
 package jp.zero.jadetech.jade;
 
-import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
 import com.gregtechceu.gtceu.common.blockentity.CableBlockEntity;
 import com.gregtechceu.gtceu.common.blockentity.FluidPipeBlockEntity;
 import com.gregtechceu.gtceu.common.blockentity.ItemPipeBlockEntity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 
@@ -26,7 +26,11 @@ public final class GtJadeRegistration {
 
     public static void registerServer(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(PipeNetworkTotalsProvider.INSTANCE, FluidPipeBlockEntity.class);
-        registration.registerBlockDataProvider(MultiblockTotalsProvider.INSTANCE, MultiblockControllerMachine.class);
+        // Machines are not block entities in this GregTech generation,
+        // so the multiblock provider registers for every block entity
+        // (the same pattern GregTech's own machine providers use) and
+        // resolves the controller itself.
+        registration.registerBlockDataProvider(MultiblockTotalsProvider.INSTANCE, BlockEntity.class);
         registration.registerBlockDataProvider(ItemPipeFlowProvider.INSTANCE, ItemPipeBlockEntity.class);
         registration.registerBlockDataProvider(CableNetworkProvider.INSTANCE, CableBlockEntity.class);
     }

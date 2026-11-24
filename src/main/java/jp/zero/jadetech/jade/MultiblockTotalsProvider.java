@@ -1,6 +1,7 @@
 package jp.zero.jadetech.jade;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.FluidHatchPartMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.ItemBusPartMachine;
@@ -46,7 +47,11 @@ public enum MultiblockTotalsProvider implements IServerDataProvider<BlockAccesso
 
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-        if (!(accessor.getBlockEntity() instanceof MultiblockControllerMachine controller)) {
+        // Machines are not block entities in this GregTech generation:
+        // the block entity is a holder, so resolve the machine from the
+        // position the way GregTech's own providers do.
+        if (!(MetaMachine.getMachine(accessor.getLevel(), accessor.getPosition())
+                instanceof MultiblockControllerMachine controller)) {
             return;
         }
         if (!controller.isFormed()) {

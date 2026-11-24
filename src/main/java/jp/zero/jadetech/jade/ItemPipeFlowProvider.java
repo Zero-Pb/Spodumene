@@ -53,7 +53,7 @@ public enum ItemPipeFlowProvider implements IServerDataProvider<BlockAccessor> {
         while (!queue.isEmpty() && pipeCount < MAX_PIPES) {
             ItemPipeBlockEntity pipe = queue.poll();
             pipeCount++;
-            total += pipe.getTransferredItemCount();
+            total += pipe.getTransferredItems();
 
             for (Direction dir : Direction.values()) {
                 if (!pipe.isConnected(dir)) {

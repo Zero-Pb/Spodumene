@@ -3,7 +3,8 @@ package jp.zero.jadetech.jade;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
-import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeLogic;
+import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.common.blockentity.CableBlockEntity;
 import com.gregtechceu.gtceu.common.machine.electric.BatteryBufferMachine;
 import com.gregtechceu.gtceu.utils.GTUtil;
@@ -99,39 +100,57 @@ public enum CableNetworkProvider implements IServerDataProvider<BlockAccessor> {
                     if (visited.add(nextPos) && next.isConnected(dir.getOpposite())) {
                         queue.add(next);
                     }
-                } else if (neighbour instanceof MetaMachine machine && endpointPositions.add(nextPos)) {
+                    continue;
+                }
+                // Machines are not block entities in this GregTech
+                // generation; resolve the machine from the position.
+                MetaMachine machine = MetaMachine.getMachine(level, nextPos);
+                if (machine != null && endpointPositions.add(nextPos)) {
                     Block block = machine.getBlockState().getBlock();
                     endpoints.merge(block, 1, Integer::sum);
-                    if (machine instanceof BatteryBufferMachine buffer) {
-                        batteryEu += buffer.getEnergyStored();
-                        batteryCap += buffer.getEnergyCapacity();
-                    }
-                    // Output side of this machine. Generator containers
-                    // are recipe-driven: getOutputAmperage() returns the
-                    // amperage of the recipe the machine has (last) run,
-                    // or its rated output when it never ran one. Summed
-                    // per voltage, that is the maximum the connected
-                    // sources could push into this network as it is
-                    // currently built - the number the flow warning uses.
+                    // One pass over the machine's traits collects its
+                    // energy containers (output side and stored energy)
+                    // and whether its recipe logic is running.
+                    // Generator containers are recipe-driven:
+                    // getOutputAmperage() returns the amperage of the
+                    // recipe the machine has (last) run, or its rated
+                    // output when it never ran one. Summed per voltage,
+                    // that is the maximum the connected sources could
+                    // push into this network as it is currently built -
+                    // the number the flow warning uses.
                     long outAmps = 0;
                     long outVoltage = 0;
-                    for (IEnergyContainer container
-                            : machine.getTraitHolder().getTraitsByInterface(IEnergyContainer.class)) {
-                        if (container.getOutputAmperage() > 0) {
-                            outAmps += container.getOutputAmperage();
-                            outVoltage = Math.max(outVoltage, container.getOutputVoltage());
-                            potentialAmpsByVoltage.merge(container.getOutputVoltage(),
-                                    container.getOutputAmperage(), Long::sum);
+                    long storedEu = 0;
+                    long storedCap = 0;
+                    boolean hasRecipeLogic = false;
+                    boolean recipeActive = false;
+                    for (MachineTrait trait : machine.getTraits()) {
+                        if (trait instanceof IEnergyContainer container) {
+                            storedEu += container.getEnergyStored();
+                            storedCap += container.getEnergyCapacity();
+                            if (container.getOutputAmperage() > 0) {
+                                outAmps += container.getOutputAmperage();
+                                outVoltage = Math.max(outVoltage, container.getOutputVoltage());
+                                potentialAmpsByVoltage.merge(container.getOutputVoltage(),
+                                        container.getOutputAmperage(), Long::sum);
+                            }
                         }
+                        if (trait instanceof RecipeLogic logic) {
+                            hasRecipeLogic = true;
+                            recipeActive = logic.isActive();
+                        }
+                    }
+                    if (machine instanceof BatteryBufferMachine) {
+                        batteryEu += storedEu;
+                        batteryCap += storedCap;
                     }
                     // The supply list is stricter: it shows what is being
                     // produced right now, so a workable machine must be
                     // actively running, and a battery buffer must hold
                     // energy to give.
-                    RecipeLogic recipeLogic = machine.getTrait(RecipeLogic.class);
-                    boolean producing = recipeLogic == null || recipeLogic.isActive();
-                    if (machine instanceof BatteryBufferMachine buffer) {
-                        producing = buffer.getEnergyStored() > 0;
+                    boolean producing = !hasRecipeLogic || recipeActive;
+                    if (machine instanceof BatteryBufferMachine) {
+                        producing = storedEu > 0;
                     }
                     if (outAmps > 0 && producing) {
                         ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(block);
