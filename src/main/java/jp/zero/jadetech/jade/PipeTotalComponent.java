@@ -1,6 +1,7 @@
 package jp.zero.jadetech.jade;
 
 import jp.zero.jadetech.JadeTech;
+import jp.zero.jadetech.JadeTechConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,9 +16,6 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
 /**
  * Client side of the network totals display.
  *
@@ -25,11 +23,13 @@ import java.util.Locale;
  * Jade server data and renders one line per fluid. Registered for every
  * block, but stays silent unless the data is present, which only happens
  * for GregTech fluid pipes.</p>
+ *
+ * <p>The totals themselves are always shown. The summed capacity and the
+ * pipe count are details: they follow Jade's show-details key (sneak by
+ * default), unless the config asks for details to always be visible.</p>
  */
 public enum PipeTotalComponent implements IBlockComponentProvider {
     INSTANCE;
-
-    private static final NumberFormat FORMAT = NumberFormat.getIntegerInstance(Locale.US);
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -37,6 +37,8 @@ public enum PipeTotalComponent implements IBlockComponentProvider {
         if (data == null || !data.contains(PipeNetworkTotalsProvider.DATA_KEY)) {
             return;
         }
+        boolean details = JadeTechConfig.detailsShown(accessor.showDetails());
+        boolean showCapacity = details && JadeTechConfig.SHOW_CAPACITY.get();
 
         ListTag list = data.getList(PipeNetworkTotalsProvider.DATA_KEY, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
@@ -47,8 +49,19 @@ public enum PipeTotalComponent implements IBlockComponentProvider {
                 continue;
             }
             Component fluidName = new FluidStack(fluid, 1).getDisplayName();
-            long amount = entry.getLong("amount");
-            tooltip.add(Component.translatable("jadetech.network_total", fluidName, FORMAT.format(amount)));
+            String amount = FluidAmounts.format(entry.getLong("amount"));
+            if (showCapacity) {
+                tooltip.add(Component.translatable("jadetech.network_total_capacity",
+                        fluidName, amount, FluidAmounts.format(entry.getLong("capacity"))));
+            } else {
+                tooltip.add(Component.translatable("jadetech.network_total", fluidName, amount));
+            }
+        }
+
+        if (details && JadeTechConfig.SHOW_NETWORK_COUNTS.get()
+                && data.contains(PipeNetworkTotalsProvider.PIPE_COUNT_KEY)) {
+            int pipes = data.getInt(PipeNetworkTotalsProvider.PIPE_COUNT_KEY);
+            tooltip.add(Component.translatable("jadetech.network_pipes", FluidAmounts.formatCount(pipes)));
         }
     }
 

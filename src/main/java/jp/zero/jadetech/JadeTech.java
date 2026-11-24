@@ -1,7 +1,9 @@
 package jp.zero.jadetech;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +27,8 @@ public class JadeTech {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public JadeTech() {
-        LOGGER.info("JadeTech: Jade will show whole-network fluid totals for GregTech fluid pipes");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, JadeTechConfig.SPEC);
+        LOGGER.info("JadeTech: Jade addons for GregTech networks (pipe totals, multiblock hatches, item flow, cable networks)");
     }
 
     public static ResourceLocation id(String path) {

@@ -51,6 +51,7 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
         }
 
         Map<Fluid, Long> totals = new HashMap<>();
+        Map<Fluid, Long> capacities = new HashMap<>();
         Set<BlockPos> visited = new HashSet<>();
         ArrayDeque<FluidPipeBlockEntity> queue = new ArrayDeque<>();
         visited.add(start.getBlockPos());
@@ -63,7 +64,11 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
 
             for (CustomFluidTank tank : pipe.getFluidTanks()) {
                 if (tank.getFluidAmount() > 0 && !tank.getFluid().isEmpty()) {
-                    totals.merge(tank.getFluid().getFluid(), (long) tank.getFluidAmount(), Long::sum);
+                    Fluid fluid = tank.getFluid().getFluid();
+                    totals.merge(fluid, (long) tank.getFluidAmount(), Long::sum);
+                    // Capacity is summed over the tanks currently holding this
+                    // fluid; an empty tank is not dedicated to any fluid yet.
+                    capacities.merge(fluid, (long) tank.getCapacity(), Long::sum);
                 }
             }
 
@@ -97,6 +102,7 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
                     CompoundTag fluidTag = new CompoundTag();
                     fluidTag.putString("fluid", fluidId.toString());
                     fluidTag.putLong("amount", entry.getValue());
+                    fluidTag.putLong("capacity", capacities.getOrDefault(entry.getKey(), 0L));
                     list.add(fluidTag);
                 });
 
