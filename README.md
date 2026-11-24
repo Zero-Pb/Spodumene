@@ -1,10 +1,10 @@
-# JadeTech
+# Spodumene — GregTech Jade Addon
 
 Jade addons for GregTech CEu Modern (Minecraft 1.20.1 / Forge) — extra Jade displays for the things GregTech's own Jade support does not show.
 
 The first feature shows the **total amount of each fluid across a whole GregTech fluid pipe network**.
 
-GregTech's fluid pipes each hold their own tank, and fluid keeps moving between them. GregTech's built-in Jade support only shows the tanks of the single pipe you are looking at, so the network-wide total is never visible anywhere. JadeTech fixes that: look at any fluid pipe and Jade adds one line per fluid with the amount summed over every connected pipe.
+GregTech's fluid pipes each hold their own tank, and fluid keeps moving between them. GregTech's built-in Jade support only shows the tanks of the single pipe you are looking at, so the network-wide total is never visible anywhere. Spodumene fixes that: look at any fluid pipe and Jade adds one line per fluid with the amount summed over every connected pipe.
 
 ## What it does
 
@@ -23,12 +23,12 @@ GregTech's fluid pipes each hold their own tank, and fluid keeps moving between 
 - GregTech item pipes never hold items — transfers are simulated and each pipe only keeps a counter of items in transit, with no item types recorded. So instead of a contents list, looking at an item pipe shows one line with the total number of items currently in transit across the whole network: a quick way to tell whether a line is moving or stalled.
 
 ### Cable network summary (v0.2.0)
-- GregTech's own Jade provider already shows a single cable's voltage and amperage, so JadeTech adds the network view instead: how many cables the network spans, its highest voltage tier, which machines are connected to it (with counts), a supply list of the machines currently outputting into the network with their live amperage (generators report their recipe-driven output, so this is what they are producing right now), and the total EU stored in its battery buffers.
+- GregTech's own Jade provider already shows a single cable's voltage and amperage, so Spodumene adds the network view instead: how many cables the network spans, its highest voltage tier, which machines are connected to it (with counts), a supply list of the machines currently outputting into the network with their live amperage (generators report their recipe-driven output, so this is what they are producing right now), and the total EU stored in its battery buffers.
 - It also shows the maximum amperage the connected power sources could push (summed per voltage) next to the weakest cable's amperage limit, with a red warning when the supply could overload the cables. The endpoint list, supply list and battery total are details shown while sneaking; the headline and the warning are always visible.
 
 ### Configuration
 - Every feature is a separate Jade provider, so each one can be switched off individually in Jade's own config screen.
-- Display options live in `config/jadetech-client.toml`: fluid unit (mB or B), supply list style (machine names or amperage only), whether capacities / network counts / cable endpoints / battery EU / the flow warning are shown, how many entries multiblock lists show, and an option to always show the sneak-gated details without sneaking.
+- Display options live in `config/spodumene-client.toml`: fluid unit (mB or B), supply list style (machine names or amperage only), whether capacities / network counts / cable endpoints / battery EU / the flow warning are shown, how many entries multiblock lists show, and an option to always show the sneak-gated details without sneaking.
 
 ## Requirements
 
@@ -44,7 +44,7 @@ For multiplayer, install it on both the server (which computes the totals) and t
 ./gradlew build
 ```
 
-Output: `build/libs/jadetech-0.2.0.jar`
+Output: `build/libs/spodumene-0.2.0.jar`
 
 Jade, GregTech CEu Modern and LDLib are pulled from CurseMaven at build time
 (`curse.maven:jade-324717:5876199`, `curse.maven:gregtechceu-modern-890405:6764529`,
@@ -56,7 +56,7 @@ Monifactory 0.13.8 ships.
 
 A manual-trigger GitHub Actions workflow is included under
 `.github/workflows/build.yml` (same setup as Void Rain Fix: press
-"Run workflow", get the jar from the `jadetech-jar` artifact).
+"Run workflow", get the jar from the `spodumene-jar` artifact).
 
 ## Known simplifications
 

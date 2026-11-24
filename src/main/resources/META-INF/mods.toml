@@ -1,4 +1,4 @@
-# JadeTech - mods.toml
+# Spodumene - mods.toml
 modLoader="javafml" #mandatory
 loaderVersion="${loader_version_range}" #mandatory
 license="${mod_license}"
