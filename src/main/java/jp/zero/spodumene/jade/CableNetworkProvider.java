@@ -4,6 +4,8 @@ import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
+import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.machine.trait.NotifiableEnergyContainer;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.common.blockentity.CableBlockEntity;
 import com.gregtechceu.gtceu.common.machine.electric.BatteryBufferMachine;
@@ -128,7 +130,29 @@ public enum CableNetworkProvider implements IServerDataProvider<BlockAccessor> {
                         if (trait instanceof IEnergyContainer container) {
                             storedEu += container.getEnergyStored();
                             storedCap += container.getEnergyCapacity();
-                            if (container.getOutputAmperage() > 0) {
+                            // Only a real output counts as supply. Two
+                            // guards, both needed:
+                            // 1. output voltage must be above 0. A
+                            //    RecipeAmperageEnergyContainer still
+                            //    returns the amperage of the last recipe
+                            //    it ran even when its rated output
+                            //    voltage is 0, so counting on amperage
+                            //    alone piled those phantom amps into a
+                            //    0 V group that renders as ULV.
+                            // 2. when the container is a
+                            //    NotifiableEnergyContainer, GregTech
+                            //    itself must treat it as an output
+                            //    (handlerIO OUT or BOTH). Containers
+                            //    whose type carries no handlerIO are
+                            //    kept on the voltage guard alone, so a
+                            //    real source of an unknown container
+                            //    type is not silently dropped.
+                            boolean isOutput = container.getOutputVoltage() > 0;
+                            if (isOutput && container instanceof NotifiableEnergyContainer notifiable) {
+                                IO handlerIO = notifiable.getHandlerIO();
+                                isOutput = handlerIO == IO.OUT || handlerIO == IO.BOTH;
+                            }
+                            if (isOutput && container.getOutputAmperage() > 0) {
                                 outAmps += container.getOutputAmperage();
                                 outVoltage = Math.max(outVoltage, container.getOutputVoltage());
                                 potentialAmpsByVoltage.merge(container.getOutputVoltage(),

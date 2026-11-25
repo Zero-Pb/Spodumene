@@ -24,9 +24,10 @@ import snownee.jade.api.config.IPluginConfig;
  * block, but stays silent unless the data is present, which only happens
  * for GregTech fluid pipes.</p>
  *
- * <p>The totals themselves are always shown. The summed capacity and the
- * pipe count are details: they follow Jade's show-details key (sneak by
- * default), unless the config asks for details to always be visible.</p>
+ * <p>The totals themselves are always shown. The whole-network capacity
+ * (one stable figure for all pipes, contents or not) and the pipe count
+ * are details: they follow Jade's show-details key (sneak by default),
+ * unless the config asks for details to always be visible.</p>
  */
 public enum PipeTotalComponent implements IBlockComponentProvider {
     INSTANCE;
@@ -50,12 +51,12 @@ public enum PipeTotalComponent implements IBlockComponentProvider {
             }
             Component fluidName = new FluidStack(fluid, 1).getDisplayName();
             String amount = FluidAmounts.format(entry.getLong("amount"));
-            if (showCapacity) {
-                tooltip.add(Component.translatable("spodumene.network_total_capacity",
-                        fluidName, amount, FluidAmounts.format(entry.getLong("capacity"))));
-            } else {
-                tooltip.add(Component.translatable("spodumene.network_total", fluidName, amount));
-            }
+            tooltip.add(Component.translatable("spodumene.network_total", fluidName, amount));
+        }
+
+        if (showCapacity && data.contains(PipeNetworkTotalsProvider.NETWORK_CAPACITY_KEY)) {
+            tooltip.add(Component.translatable("spodumene.network_capacity",
+                    FluidAmounts.format(data.getLong(PipeNetworkTotalsProvider.NETWORK_CAPACITY_KEY))));
         }
 
         if (details && SpodumeneConfig.SHOW_NETWORK_COUNTS.get()

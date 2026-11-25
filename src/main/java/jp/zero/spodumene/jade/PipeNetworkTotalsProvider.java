@@ -39,6 +39,8 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
 
     public static final String DATA_KEY = "network_fluids";
     public static final String PIPE_COUNT_KEY = "network_pipes";
+    /** Whole-network capacity: every visited pipe's tanks, contents or not. */
+    public static final String NETWORK_CAPACITY_KEY = "network_capacity";
 
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -51,24 +53,28 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
         }
 
         Map<Fluid, Long> totals = new HashMap<>();
-        Map<Fluid, Long> capacities = new HashMap<>();
         Set<BlockPos> visited = new HashSet<>();
         ArrayDeque<FluidPipeBlockEntity> queue = new ArrayDeque<>();
         visited.add(start.getBlockPos());
         queue.add(start);
 
         int pipeCount = 0;
+        long networkCapacity = 0;
         while (!queue.isEmpty() && pipeCount < MAX_PIPES) {
             FluidPipeBlockEntity pipe = queue.poll();
             pipeCount++;
 
             for (CustomFluidTank tank : pipe.getFluidTanks()) {
+                // Capacity is summed over every tank, contents or not.
+                // Summing it only for tanks currently holding a fluid made
+                // the figure flicker by one pipe's capacity (~2,000 mB):
+                // GT pipes constantly shuffle fluid between pipes, so a
+                // tank empties and refills and its capacity kept dropping
+                // out of, and back into, the per-fluid total.
+                networkCapacity += tank.getCapacity();
                 if (tank.getFluidAmount() > 0 && !tank.getFluid().isEmpty()) {
                     Fluid fluid = tank.getFluid().getFluid();
                     totals.merge(fluid, (long) tank.getFluidAmount(), Long::sum);
-                    // Capacity is summed over the tanks currently holding this
-                    // fluid; an empty tank is not dedicated to any fluid yet.
-                    capacities.merge(fluid, (long) tank.getCapacity(), Long::sum);
                 }
             }
 
@@ -102,12 +108,12 @@ public enum PipeNetworkTotalsProvider implements IServerDataProvider<BlockAccess
                     CompoundTag fluidTag = new CompoundTag();
                     fluidTag.putString("fluid", fluidId.toString());
                     fluidTag.putLong("amount", entry.getValue());
-                    fluidTag.putLong("capacity", capacities.getOrDefault(entry.getKey(), 0L));
                     list.add(fluidTag);
                 });
 
         data.put(DATA_KEY, list);
         data.putInt(PIPE_COUNT_KEY, pipeCount);
+        data.putLong(NETWORK_CAPACITY_KEY, networkCapacity);
     }
 
     @Override
